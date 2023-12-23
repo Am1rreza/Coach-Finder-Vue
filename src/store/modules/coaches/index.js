@@ -2,6 +2,7 @@ export default {
   namespaced: true,
   state() {
     return {
+      lastFetch: null,
       coaches: [
         {
           id: 'c1',
@@ -31,6 +32,9 @@ export default {
     setCoaches(state, payload) {
       state.coaches = payload;
     },
+    setFetchTimestamp(state) {
+      state.lastFetch = new Date().getTime();
+    }
   },
   actions: {
     async registerCoach(context, payload) {
@@ -65,7 +69,11 @@ export default {
         id: userId,
       });
     },
-    async loadCoaches(context) {
+    async loadCoaches(context,payload) {
+      if(!payload.forceRefresh && !context.getters.shouldUpdate) {
+        return;
+      }
+
       const response = await fetch(
         `https://coach-finder-vue-95298-default-rtdb.firebaseio.com/coaches.json`
       );
@@ -91,6 +99,7 @@ export default {
       }
 
       context.commit('setCoaches', coaches);
+      context.commit('setFetchTimestamp');
     },
   },
   getters: {
@@ -101,5 +110,13 @@ export default {
       const userId = rootGetters.userId;
       return coaches.some((coach) => coach.id === userId);
     },
+    shouldUpdate(state) {
+      const lastFetch = state.lastFetch;
+      if (!lastFetch) {
+        return true;
+      }
+      const currentTimeStamp = new Date().getTime();
+      return (currentTimeStamp - lastFetch) / 1000 > 60;
+    }
   },
 };
