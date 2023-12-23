@@ -48,7 +48,7 @@ export default {
     async fetchRequests(context) {
       const coachId = context.rootGetters.userId;
       const response = await fetch(
-        `https://coach-finder-vue-95298-default-rtdb.firebaseio.com/requests/${coachId}.jsofn`
+        `https://coach-finder-vue-95298-default-rtdb.firebaseio.com/requests/${coachId}.json`
       );
       const responseData = await response.json();
 
